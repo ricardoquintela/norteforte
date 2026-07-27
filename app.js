@@ -2552,8 +2552,8 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
   const [selected, setSelected] = useState(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [delId, setDelId] = useState(null);
-  const [showInvite, setShowInvite] = useState(false);
   const [inviteData, setInviteData] = useState(null);
+  const [copiedInvite, setCopiedInvite] = useState(false);
   const [resetData, setResetData] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -2595,7 +2595,7 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
   if (showNewForm) return React.createElement(NewFighterForm, {
     onBack: () => setShowNewForm(false),
     onSave: async (fighter, newUser) => {
-      await db.insert("fighters", { ...fighter, available: false, status: "approved" , viewAsClub, setViewAsClub });
+      await db.insert("fighters", { ...fighter, available: false, status: "approved" });
       await db.insert("users", newUser);
       setFighters(p => [...p, fighter]); setUsers(p => [...p, newUser]);
       setShowNewForm(false); setInviteData({ fighter, user: newUser });
@@ -2614,19 +2614,27 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
 
       React.createElement(Header, { onLogout, user, currentPage: "fighters", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
       React.createElement("input", { style: { ...s.inp, marginBottom: 14, background: T.BG2 }, placeholder: "🔍  Nome ou modalidade...", value: search, onChange: e => setSearch(e.target.value) }),
-      showInvite && React.createElement(InviteModal, { onClose: () => setShowInvite(false), user, club, clubs, defaultEmail: inviteData?.fighter?.email || "", fighters, users }),
-      inviteData && React.createElement("div", { style: { background: "#0a1a0e", border: "1px solid #4caf7d44", borderRadius: 10, padding: "12px 16px", marginBottom: 16 } },
-        React.createElement("div", { style: { fontSize: 13, color: "#4caf7d", marginBottom: 8, fontWeight: 700 } }, `✓ Perfil criado — ${inviteData.fighter.name}`),
-        React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginBottom: 8 } }, `Username: ${inviteData.user.username} · Password: ${inviteData.user.password}`),
-        React.createElement("div", { style: { display: "flex", gap: 8 } },
-          React.createElement("button", { onClick: () => setShowInvite(true), style: { ...s.btnGreen, padding: "4px 12px", fontSize: 12, marginTop: 0 } }, "✉ Enviar convite por email"),
-          React.createElement("button", { onClick: () => setInviteData(null), style: { ...s.btnOutline, padding: "4px 12px", fontSize: 12 } }, "Fechar")
-        )
-      ),
+      inviteData && (() => {
+        const iName = inviteData.fighter.name;
+        const iUser = inviteData.user.username;
+        const iPass = inviteData.user.password;
+        const iEmail = inviteData.fighter.email || "";
+        const clubName = (clubs.find(c => c.id === inviteData.fighter.club_id) || {}).name || "The Fighters App";
+        const msg = `Olá ${iName}!\n\nAqui estão as tuas credenciais de acesso à The Fighters App (${clubName}):\n\nAcede em: https://thefightersapp.vercel.app\n\nUsername: ${iUser}\nPassword: ${iPass}\n\nPor segurança, altera a password após o primeiro login.`;
+        return React.createElement("div", { style: { background: "#0a1a0e", border: "1px solid #4caf7d44", borderRadius: 10, padding: "12px 16px", marginBottom: 16 } },
+          React.createElement("div", { style: { fontSize: 13, color: "#4caf7d", marginBottom: 8, fontWeight: 700 } }, `✓ Perfil criado — ${iName}`),
+          React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginBottom: 10 } }, `Username: ${iUser} · Password: ${iPass}`),
+          React.createElement("div", { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+            iEmail && React.createElement("a", { href: `mailto:${iEmail}?subject=${encodeURIComponent("Acesso à The Fighters App — " + clubName)}&body=${encodeURIComponent(msg)}`, style: { ...s.btnGreen, padding: "5px 12px", fontSize: 12, marginTop: 0, textDecoration: "none", display: "inline-block" } }, "✉ Email"),
+            React.createElement("a", { href: `https://wa.me/?text=${encodeURIComponent(msg)}`, target: "_blank", rel: "noopener", style: { padding: "5px 12px", fontSize: 12, borderRadius: 8, background: "#25D366", color: "#000", fontWeight: 700, textDecoration: "none", display: "inline-block" } }, "WhatsApp"),
+            React.createElement("button", { onClick: () => { if (navigator.clipboard) { navigator.clipboard.writeText(msg); setCopiedInvite(true); setTimeout(() => setCopiedInvite(false), 2000); } }, style: { ...s.btnOutline, padding: "5px 12px", fontSize: 12 } }, copiedInvite ? "Copiado!" : "Copiar"),
+            React.createElement("button", { onClick: () => setInviteData(null), style: { ...s.btnOutline, padding: "5px 12px", fontSize: 12, borderColor: T.BORDER, color: T.TEXT3 } }, "Fechar")
+          )
+        );
+      })(),
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } },
         React.createElement("span", { style: { fontSize: 13, color: T.TEXT2, textTransform: "uppercase", letterSpacing: 1 } }, `${fighters.filter(f => { const q = search.toLowerCase(); return !search || f.name?.toLowerCase().includes(q) || f.modality?.toLowerCase().includes(q) || f.sub_modality?.toLowerCase().includes(q); }).length} lutadores`),
         React.createElement("div", { style: { display: "flex", gap: 8 } },
-          React.createElement("button", { onClick: () => setShowInvite(true), style: { ...s.btnOutline, borderColor: "#4caf7d44", color: "#4caf7d" } }, "✉ Convidar"),
           React.createElement("button", { onClick: () => setShowNewForm(true), style: s.btnOutline }, "+ Novo Lutador")
         )
       ),
@@ -2654,7 +2662,20 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
               )
             ),
             React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10, justifyContent: "flex-end" } },
-              !fu && React.createElement("button", { onClick: () => { setInviteData({ fighter: f, user: {} }); setShowInvite(true); }, style: { ...s.btnOutline, padding: "4px 12px", fontSize: 12, borderColor: "#4caf7d44", color: "#4caf7d" } }, "✉ Convite"),
+              !fu && React.createElement("button", { onClick: async () => {
+                const id = Date.now();
+                const existing = users.map(u => u.username);
+                let uname = emailToUsername(f.email || f.name.toLowerCase().replace(/[^a-z0-9]/g, ""));
+                let base = uname, i = 2;
+                while (existing.includes(uname)) { uname = base + i; i++; }
+                const pass = generatePassword();
+                const newUser = { id: `user_${id}`, name: f.name, role: "athlete", fighter_id: f.id, username: uname, password: pass, email: f.email || "", club_id: f.club_id };
+                try {
+                  await db.insert("users", newUser);
+                  setUsers(p => [...p, newUser]);
+                  setInviteData({ fighter: f, user: newUser });
+                } catch(e) { alert("Erro ao gerar credenciais. Tenta novamente."); }
+              }, style: { ...s.btnOutline, padding: "4px 12px", fontSize: 12, borderColor: "#4caf7d44", color: "#4caf7d" } }, "✉ Convite"),
               React.createElement("button", { onClick: () => resetPassword(f), style: { ...s.btnOutline, padding: "4px 12px", fontSize: 12, borderColor: "#5b8fd444", color: "#5b8fd4" } }, "🔑 Password"),
               React.createElement("button", { onClick: () => setDelId(f.id), style: { ...s.btnRed, padding: "4px 12px", fontSize: 12 } }, "✕ Eliminar")
             )
