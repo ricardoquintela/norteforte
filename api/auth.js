@@ -222,15 +222,19 @@ export default async function handler(req, res) {
 
     // ── RESET PASSWORD (esqueci) ────────────────────────────────────
     if (action === "reset" && req.method === "POST") {
-                const { username } = req.body;
-                if (!username) return res.status(400).json({ error: "Username obrigatório." });
+                // Aceita username OU email (campo "identifier"; "username" mantido por compatibilidade)
+                const raw = req.body.identifier || req.body.username;
+                if (!raw) return res.status(400).json({ error: "Indica o username ou e-mail." });
+                const id = raw.toLowerCase().trim();
+                const isEmail = id.includes("@");
+                const column = isEmail ? "email" : "username";
 
-            const r = await fetch(`${SUPABASE_URL}/rest/v1/users?username=ilike.${encodeURIComponent(username.toLowerCase().trim())}&select=*`, {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/users?${column}=ilike.${encodeURIComponent(id)}&select=*`, {
                             headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
             });
                 if (!r.ok) return res.status(503).json({ error: "Erro temporário, tenta novamente." });
                 const users = await r.json();
-                if (!users?.length) return res.status(404).json({ error: "Username não encontrado." });
+                if (!users?.length) return res.status(404).json({ error: isEmail ? "E-mail não encontrado." : "Username não encontrado." });
 
             const user = users[0];
                 if (!user.email) return res.status(400).json({ error: "Sem e-mail associado." });
