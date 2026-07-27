@@ -862,7 +862,7 @@ function Login({ onLogin, clubs }) {
   const [attempts, setAttempts] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
-  const [forgotUsername, setForgotUsername] = useState("");
+  const [forgotId, setForgotId] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [newPassword, setNewPassword] = useState(null);
 
@@ -904,13 +904,13 @@ function Login({ onLogin, clubs }) {
   }
 
   async function doForgot() {
-    if (!forgotUsername.trim()) return;
+    if (!forgotId.trim()) return;
     setForgotLoading(true); setErr("");
     try {
       const r = await fetch("/api/auth?action=reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: forgotUsername.trim().toLowerCase() })
+        body: JSON.stringify({ identifier: forgotId.trim().toLowerCase() })
       });
       const data = await r.json();
       setForgotLoading(false);
@@ -930,12 +930,12 @@ function Login({ onLogin, clubs }) {
               React.createElement("div", { style: { fontSize: 32, textAlign: "center", marginBottom: 12 } },),
               React.createElement("div", { style: { fontSize: 16, color: T.GOLD, fontWeight: 700, marginBottom: 8, textAlign: "center" } }, "E-mail enviado!"),
               React.createElement("div", { style: { fontSize: 13, color: T.TEXT2, marginBottom: 16, textAlign: "center" } }, "Verifica a tua caixa de entrada. A nova password foi enviada para o teu e-mail."),
-              React.createElement("button", { onClick: () => { setShowForgot(false); setNewPassword(null); setForgotUsername(""); setErr(""); }, style: { ...s.btnGold, width: "100%", marginTop: 0 } }, "Ir para o login")
+              React.createElement("button", { onClick: () => { setShowForgot(false); setNewPassword(null); setForgotId(""); setErr(""); }, style: { ...s.btnGold, width: "100%", marginTop: 0 } }, "Ir para o login")
             )
           : React.createElement("div", null,
               React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: T.TEXT, marginBottom: 12 } }, "Esqueci a password"),
-              React.createElement("div", { style: { fontSize: 13, color: T.TEXT2, marginBottom: 16 } }, "Indica o teu username e enviamos uma nova password para o teu e-mail."),
-              React.createElement("div", { style: { marginBottom: 16 } }, React.createElement("label", { style: lbl }, "Username"), React.createElement("input", { style: inp, value: forgotUsername, onChange: e => setForgotUsername(e.target.value), onKeyDown: e => e.key === "Enter" && doForgot() })),
+              React.createElement("div", { style: { fontSize: 13, color: T.TEXT2, marginBottom: 16 } }, "Indica o teu username ou e-mail e enviamos uma nova password para o teu e-mail."),
+              React.createElement("div", { style: { marginBottom: 16 } }, React.createElement("label", { style: lbl }, "Username ou E-mail"), React.createElement("input", { style: inp, value: forgotId, onChange: e => setForgotId(e.target.value), placeholder: "username ou email@exemplo.com", onKeyDown: e => e.key === "Enter" && doForgot() })),
               err && React.createElement("div", { style: { fontSize: 13, color: "#e05555", marginBottom: 10 } }, err),
               React.createElement("button", { onClick: doForgot, disabled: forgotLoading, style: { ...s.btnGold, width: "100%", marginTop: 0 } }, forgotLoading ? "A enviar..." : "Enviar nova password"),
               React.createElement("div", { style: { textAlign: "center", marginTop: 12 } },
@@ -2916,6 +2916,7 @@ function MatchmakingPage({ onLogout, user, setPage, pendingCount, club, clubs, v
       if (f.modality !== modality) return false;
       if (sub_modality && f.sub_modality !== sub_modality) return false;
       if (level && f.level !== level) return false;
+      if (gender && f.gender !== gender) return false;
       if (escalao && f.category && f.category !== escalao) return false;
       if (weight && !validWeights.has(f.weight)) return false;
       if (country && getClubCountry(f.club_id) !== country) return false;
@@ -2926,6 +2927,7 @@ function MatchmakingPage({ onLogout, user, setPage, pendingCount, club, clubs, v
       for (let j = i + 1; j < candidates.length; j++) {
         const a = candidates[i], b = candidates[j];
         if (a.club_id === b.club_id) continue;
+        if (a.gender && b.gender && a.gender !== b.gender) continue;
         const ra = getRecord(a.id), rb = getRecord(b.id);
         const ev = evaluatePair(a, b, ra, rb, fight_date);
         result.push({ a, b, ra, rb, ev });
