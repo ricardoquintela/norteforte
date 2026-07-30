@@ -1845,7 +1845,7 @@ function FighterProfile({ fighter, onBack, onSave, user, isOwner, onLogout, setP
             isOwner ? React.createElement("input", { style: inp, value: f.team || "", onChange: e => upd("team", e.target.value) }) : React.createElement("div", { style: { fontSize: 14, color: T.TEXT, padding: "8px 0" } }, f.team)
           )
         ),
-        isOwner && React.createElement("button", { onClick: saveProfile, disabled: saving || !isDirty, style: { ...s.btnGold, opacity: (saving || !isDirty) ? 0.4 : 1 } }, saving ? "A guardar..." : isDirty ? "Guardar alterações" : "Sem alterações")
+        isOwner && React.createElement("button", { onClick: saveProfile, disabled: saving || !isDirty, style: { ...s.btnGold, ...((saving || !isDirty) ? { background: T.BG4, color: T.TEXT2, border: `1px solid ${T.BORDER}`, cursor: "not-allowed" } : {}) } }, saving ? "A guardar..." : isDirty ? "Guardar alterações" : "Sem alterações")
       )
     );
 
