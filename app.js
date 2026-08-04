@@ -537,7 +537,7 @@ function AccountModal({ user, onClose }) {
   );
 }
 
-function Header({ onLogout, user, currentPage, setPage, pendingCount = 0, club, viewAsClub, setViewAsClub }) {
+function Header({ onLogout, user, currentPage, setPage, pendingCount = 0, resolveCount = 0, club, viewAsClub, setViewAsClub }) {
   const s = getStyles();
   const [showAccount, setShowAccount] = React.useState(false);
   return React.createElement("div", { style: { textAlign: "center", marginBottom: 24, paddingBottom: 20, borderBottom: `1px solid ${T.BORDER}` } },
@@ -646,6 +646,22 @@ function Header({ onLogout, user, currentPage, setPage, pendingCount = 0, club, 
               React.createElement("polyline", { points: "9 22 9 12 15 12 15 22" })
             ),
               "Clubes"
+            ),
+        user.role === "superadmin" && !viewAsClub && React.createElement("button", { onClick: () => setPage("resolve"), style: {
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                padding: "8px 12px", minWidth: 60, borderRadius: 10, position: "relative",
+                border: `1px solid ${currentPage === "resolve" ? "#d4844c" : "#ffffff15"}`,
+                background: currentPage === "resolve" ? "#d4844c22" : "transparent",
+                color: currentPage === "resolve" ? "#d4844c" : "#ffffff66",
+                cursor: "pointer", fontSize: 10, fontWeight: currentPage === "resolve" ? 700 : 400,
+                transition: "all 0.15s"
+              } },
+              React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", style: { display: "block" } },
+              React.createElement("path", { d: "M9 11l3 3L22 4" }),
+              React.createElement("path", { d: "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" })
+            ),
+              "Resolver",
+              resolveCount > 0 && React.createElement("span", { style: { position: "absolute", top: -4, right: -4, background: "#d4844c", color: "#fff", borderRadius: "50%", width: 16, height: 16, fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" } }, resolveCount > 9 ? "9+" : resolveCount)
             ),
         React.createElement("button", { onClick: () => setPage("calendar"), style: { 
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
@@ -819,7 +835,7 @@ function CalendarPage({ onLogout, user, setPage, pendingCount, club, viewAsClub,
 
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "calendar", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "calendar", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } },
         React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: T.TEXT, textTransform: "uppercase", letterSpacing: 1 } }, "Calendário de Provas"),
         canEdit && React.createElement("button", { onClick: () => { setShowForm(p => !p); setEditEvent(null); }, style: s.btnOutline }, "+ Nova Prova")
@@ -1182,7 +1198,7 @@ function PendingPage({ onLogout, user, setPage, setUsers, users, pendingCount, c
 
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "pending", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "pending", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: T.TEXT, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1 } }, `Pedidos Pendentes · ${pending.length}`),
       loading && React.createElement("div", { style: { color: T.TEXT2, textAlign: "center", padding: 24 } }, "A carregar..."),
       pending.length === 0 && !loading && React.createElement(Card, null, React.createElement("div", { style: { color: T.TEXT3, textAlign: "center", padding: "24px 0" } }, "Nenhum pedido pendente.")),
@@ -1261,7 +1277,7 @@ function DashboardPage({ onLogout, user, setPage, pendingCount, clubs, allFighte
 
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 720, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "dashboard", setPage, pendingCount, club: null, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "dashboard", setPage, pendingCount, resolveCount, club: null, viewAsClub, setViewAsClub }),
 
       React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "#ff9900", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 } }, "Dashboard Analítico"),
 
@@ -1364,7 +1380,7 @@ function ClubsPage({ onLogout, user, setPage, pendingCount, clubs, setClubes, vi
 
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "clubs", setPage, pendingCount, club: null, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "clubs", setPage, pendingCount, resolveCount, club: null, viewAsClub, setViewAsClub }),
       inviteClub && React.createElement(InviteModal, { onClose: () => setInviteClub(null), user, club: inviteClub, clubs, defaultClubId: inviteClub.id, defaultRole: "admin", defaultEmail: "" }),
       React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } },
         React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: "#ff9900", textTransform: "uppercase", letterSpacing: 1 } }, `Clubes · ${(clubs || []).length}`),
@@ -1457,7 +1473,7 @@ function TeamsPage({ onLogout, user, setPage, pendingCount, club, clubs, viewAsC
     const fighterFights = allFights.filter(f => f.fighter_id === selFighter.id);
     return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
       React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-        React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+        React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
         React.createElement("button", { onClick: () => setSelFighter(null), style: { fontSize: 13, color: T.TEXT2, background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0 } }, "← Voltar"),
         React.createElement(Card, { gold: true, style: { marginBottom: 14 } },
           React.createElement("div", { style: { display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 } },
@@ -1511,7 +1527,7 @@ function TeamsPage({ onLogout, user, setPage, pendingCount, club, clubs, viewAsC
     const teamFighters = allFighters.filter(f => (f.team || "Sem Equipa") === selected);
     return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
       React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-        React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+        React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
         React.createElement("button", { onClick: () => setSelected(null), style: { fontSize: 13, color: T.TEXT2, background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0 } }, "← Equipas"),
         React.createElement("div", { style: { fontSize: 20, fontWeight: 700, color: T.GOLD, marginBottom: 4, textTransform: "uppercase", letterSpacing: 2 } }, selected),
         React.createElement("div", { style: { fontSize: 13, color: T.TEXT2, marginBottom: 16 } }, `${teamFighters.length} atleta${teamFighters.length !== 1 ? "s" : ""}`),
@@ -1549,7 +1565,7 @@ function TeamsPage({ onLogout, user, setPage, pendingCount, club, clubs, viewAsC
   // Vista lista de equipas
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "teams", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: T.TEXT, marginBottom: 16, textTransform: "uppercase", letterSpacing: 1 } }, `Equipas · ${teams.length}`),
       React.createElement("input", { style: { ...getStyles().inp, marginBottom: 14, background: T.BG2 }, placeholder: "🔍  Pesquisar equipa...", value: searchTeam, onChange: e => setSearchTeam(e.target.value) }),
       loading && React.createElement("div", { style: { color: T.TEXT2, textAlign: "center", padding: 24 } }, "A carregar..."),
@@ -1845,7 +1861,7 @@ function FighterProfile({ fighter, onBack, onSave, user, isOwner, onLogout, setP
             isOwner ? React.createElement("input", { style: inp, value: f.team || "", onChange: e => upd("team", e.target.value) }) : React.createElement("div", { style: { fontSize: 14, color: T.TEXT, padding: "8px 0" } }, f.team)
           )
         ),
-        isOwner && React.createElement("button", { onClick: saveProfile, disabled: saving || !isDirty, style: { ...s.btnGold, ...((saving || !isDirty) ? { background: T.BG4, color: T.TEXT2, border: `1px solid ${T.BORDER}`, cursor: "not-allowed" } : {}) } }, saving ? "A guardar..." : isDirty ? "Guardar alterações" : "Sem alterações")
+        isOwner && React.createElement("button", { onClick: saveProfile, disabled: saving || !isDirty, style: { ...s.btnGold, opacity: (saving || !isDirty) ? 0.4 : 1 } }, saving ? "A guardar..." : isDirty ? "Guardar alterações" : "Sem alterações")
       )
     );
 
@@ -2153,7 +2169,7 @@ function FighterProfile({ fighter, onBack, onSave, user, isOwner, onLogout, setP
       React.createElement("img", { src: lightbox, style: { maxWidth: "95vw", maxHeight: "90vh", borderRadius: 8, objectFit: "contain" } })
     ),
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       onBack && React.createElement("button", { onClick: onBack, style: { fontSize: 13, color: T.TEXT2, background: "none", border: "none", cursor: "pointer", marginBottom: 14, padding: 0 } }, "← Voltar"),
       React.createElement(Card, { gold: true, style: { marginBottom: 14 } },
         React.createElement("div", { style: { display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 } },
@@ -2547,7 +2563,7 @@ function NewFighterForm({ onSave, onBack, onLogout, user, existingUsernames, clu
 // PARTE 6: ADMIN DASHBOARD, ATHLETE VIEW, APP ROOT
 // ═══════════════════════════════════════════════════════════
 
-function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user, page, setPage, pendingCount, club, clubs, setClubes, allFighters, allFights, viewAsClub, setViewAsClub }) {
+function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user, page, setPage, pendingCount, resolveCount, club, clubs, setClubes, allFighters, allFights, viewAsClub, setViewAsClub }) {
   const s = getStyles();
   const [selected, setSelected] = useState(null);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -2577,6 +2593,7 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
   if (page === "calendar") return React.createElement(CalendarPage, { onLogout, user, setPage, pendingCount, club, viewAsClub, setViewAsClub });
   if (page === "dashboard") return React.createElement(DashboardPage, { onLogout, user, setPage, pendingCount, clubs, allFighters, allFights, viewAsClub, setViewAsClub });
   if (page === "clubs") return React.createElement(ClubsPage, { onLogout, user, setPage, pendingCount, clubs, setClubes, viewAsClub, setViewAsClub });
+  if (page === "resolve") return React.createElement(ResolvePage, { onLogout, user, setPage, pendingCount, resolveCount, club, clubs, viewAsClub, setViewAsClub });
   if (page === "matchmaking") return React.createElement(MatchmakingPage, { onLogout, user, setPage, pendingCount, club, clubs, viewAsClub, setViewAsClub });
 
   // Modal password redefinida
@@ -2612,7 +2629,7 @@ function AdminDashboard({ fighters, setFighters, users, setUsers, onLogout, user
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
 
-      React.createElement(Header, { onLogout, user, currentPage: "fighters", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "fighters", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       React.createElement("input", { style: { ...s.inp, marginBottom: 14, background: T.BG2 }, placeholder: "🔍  Nome ou modalidade...", value: search, onChange: e => setSearch(e.target.value) }),
       inviteData && (() => {
         const iName = inviteData.fighter.name;
@@ -2694,7 +2711,7 @@ function AthleteView({ fighters, user, onLogout, setPage, pendingCount: allPendi
   const [matchConfirmDone, setMatchConfirmDone] = React.useState(false);
   if (!fighter) return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "", setPage, pendingCount, club }),
+      React.createElement(Header, { onLogout, user, currentPage: "", setPage, pendingCount, resolveCount, club }),
       React.createElement(Card, { gold: true },
         React.createElement("div", { style: { textAlign: "center", padding: "24px 0" } },
           React.createElement("div", { style: { fontSize: 16, fontWeight: 700, color: T.GOLD, marginBottom: 8 } }, "Registo pendente de aprovação"),
@@ -2718,7 +2735,8 @@ function MatchConfirmModal({ fighter, onDone }) {
   const s = getStyles();
   const [matches, setMatches] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
-  const [confirmed, setConfirmed] = React.useState({});
+  // choices[fightId] = "confirm" | "dispute" | "notme" | undefined
+  const [choices, setChoices] = React.useState({});
   const [saving, setSaving] = React.useState(false);
   const [done, setDone] = React.useState(false);
 
@@ -2758,35 +2776,56 @@ function MatchConfirmModal({ fighter, onDone }) {
     findMatches();
   }, []);
 
-  async function handleConfirm() {
+  async function handleSubmit() {
     setSaving(true);
-    const toConfirm = matches.filter(f => confirmed[f.id]);
-    for (const fight of toConfirm) {
-      // Resultado invertido
-      const mirrorResult = fight.result === "V" ? "D" : fight.result === "D" ? "V" : "E";
-      // Buscar o atleta que registou o combate
+    for (const fight of matches) {
+      const choice = choices[fight.id];
+      if (!choice || choice === "notme") continue; // ignora / não é ele
+
       const ownerFighters = await db.get("fighters", { id: fight.fighter_id });
       const owner = ownerFighters && ownerFighters[0];
-      await db.insert("fights", {
-        id: `f${Date.now()}_${fight.id}`,
-        fighter_id: fighter.id,
-        opponent: owner ? owner.name : fight.opponent_team || "Desconhecido",
-        opponent_team: owner ? (owner.team || "") : "",
-        result: mirrorResult,
-        method: fight.method,
-        event: fight.event,
-        date: fight.date,
-        modality: fight.modality,
-        sub_modality: fight.sub_modality,
-        level: fight.level,
-        weight: fight.weight,
-        federation: fight.federation || "",
-        confirmed_from: fight.id
-      });
+
+      if (choice === "confirm") {
+        // Adicionar ao histórico com resultado invertido
+        const mirrorResult = fight.result === "V" ? "D" : fight.result === "D" ? "V" : "E";
+        const newFightId = `f${Date.now()}_${fight.id}`;
+        await db.insert("fights", {
+          id: newFightId,
+          fighter_id: fighter.id,
+          opponent: owner ? owner.name : fight.opponent_team || "Desconhecido",
+          opponent_team: owner ? (owner.team || "") : "",
+          result: mirrorResult,
+          method: fight.method,
+          event: fight.event,
+          date: fight.date,
+          modality: fight.modality,
+          sub_modality: fight.sub_modality,
+          level: fight.level,
+          weight: fight.weight,
+          federation: fight.federation || "",
+          confirmed_from: fight.id
+        });
+        // Marcar o combate original como confirmado
+        await db.update("fights", fight.id, { confirmed_from: newFightId });
+      } else if (choice === "dispute") {
+        // Criar uma contestação para o superadmin resolver
+        await db.insert("fight_confirmations", {
+          id: `fc${Date.now()}_${fight.id}`,
+          fight_id: fight.id,
+          owner_fighter_id: Number(fight.fighter_id),
+          new_fighter_id: Number(fighter.id),
+          status: "disputed",
+          edited_fields: null,
+          replicated_fight_id: null,
+          owner_notified: false
+        });
+        // Marcar o combate para não voltar a aparecer a este atleta
+        await db.update("fights", fight.id, { confirmed_from: "disputed:" + fighter.id });
+      }
     }
     setSaving(false);
     setDone(true);
-    setTimeout(() => onDone(), 1500);
+    setTimeout(() => onDone(), 1800);
   }
 
   if (loading) return null;
@@ -2803,48 +2842,160 @@ function MatchConfirmModal({ fighter, onDone }) {
     React.createElement("div", { style: { background: T.BG2, border: `1px solid ${T.BORDER_GOLD}`, borderRadius: 12, padding: 24, width: "100%", maxWidth: 500 } },
       React.createElement("div", { style: { fontSize: 16, fontWeight: 700, color: T.GOLD, marginBottom: 6 } }, "Encontrámos combates com o teu nome!"),
       React.createElement("div", { style: { fontSize: 13, color: T.TEXT2, marginBottom: 20 } },
-        `Outros atletas registaram ${matches.length} combate${matches.length !== 1 ? "s" : ""} onde apareces como adversário. Confirma os que são teus para os adicionar ao teu histórico.`
+        `Outros atletas registaram ${matches.length} combate${matches.length !== 1 ? "s" : ""} onde apareces como adversário. Diz-nos, para cada um, se és tu — e se o resultado está correcto.`
       ),
       matches.map(fight => {
-        const isConfirmed = confirmed[fight.id];
+        const choice = choices[fight.id];
+        const resultLabel = fight.result === "V" ? "Derrota para ti" : fight.result === "D" ? "Vitória para ti" : "Empate";
+        const resultColor = fight.result === "V" ? "#e05555" : fight.result === "D" ? "#4caf7d" : T.TEXT3;
+        const optBtn = (val, label, color) => React.createElement("button", {
+          onClick: () => setChoices(p => ({ ...p, [fight.id]: p[fight.id] === val ? undefined : val })),
+          style: { flex: 1, padding: "7px 6px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, cursor: "pointer",
+            border: `1px solid ${choice === val ? color : T.BORDER}`,
+            background: choice === val ? color + "22" : "transparent",
+            color: choice === val ? color : T.TEXT2 }
+        }, label);
         return React.createElement("div", {
           key: fight.id,
-          style: { background: isConfirmed ? "#0a1a0e" : T.BG3, border: `1px solid ${isConfirmed ? "#4caf7d44" : T.BORDER}`, borderRadius: 8, padding: "12px 14px", marginBottom: 10, cursor: "pointer" },
-          onClick: () => setConfirmed(p => ({ ...p, [fight.id]: !p[fight.id] }))
+          style: { background: T.BG3, border: `1px solid ${choice ? T.BORDER_GOLD : T.BORDER}`, borderRadius: 8, padding: "12px 14px", marginBottom: 10 }
         },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
-            React.createElement("div", { style: { width: 22, height: 22, borderRadius: 4, border: `2px solid ${isConfirmed ? "#4caf7d" : T.BORDER}`, background: isConfirmed ? "#4caf7d" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              isConfirmed && React.createElement("span", { style: { color: "#fff", fontSize: 13, fontWeight: 700 } }, "✓")
-            ),
-            React.createElement("div", { style: { flex: 1 } },
-              React.createElement("div", { style: { fontWeight: 700, fontSize: 14, color: T.TEXT } },
-                `vs. `,
-                React.createElement("span", { style: { color: T.GOLD } }, "Adversário registado por outro atleta"),
-                React.createElement("span", { style: { color: fight.result === "V" ? "#e05555" : "#4caf7d", marginLeft: 8, fontSize: 12, fontWeight: 700 } },
-                  fight.result === "V" ? "← Derrota para ti" : fight.result === "D" ? "← Vitória para ti" : "Empate"
-                )
-              ),
-              React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginTop: 3 } },
-                `${fight.event || "—"} · ${fight.date || "—"}`
-              ),
-              React.createElement("div", { style: { display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" } },
-                React.createElement(Badge, null, fight.modality),
-                fight.sub_modality && React.createElement(Badge, { type: "gold" }, fight.sub_modality),
-                React.createElement(Badge, { type: "blue" }, fight.level),
-                fight.weight && React.createElement(Badge, null, fight.weight)
-              )
-            )
+          React.createElement("div", { style: { fontWeight: 700, fontSize: 14, color: T.TEXT, marginBottom: 3 } },
+            `${fight.event || "Combate"} `,
+            React.createElement("span", { style: { color: resultColor, fontSize: 12, fontWeight: 700 } }, `· ${resultLabel}`)
+          ),
+          React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginBottom: 6 } }, fight.date || "—"),
+          React.createElement("div", { style: { display: "flex", gap: 5, marginBottom: 10, flexWrap: "wrap" } },
+            React.createElement(Badge, null, fight.modality),
+            fight.sub_modality && React.createElement(Badge, { type: "gold" }, fight.sub_modality),
+            React.createElement(Badge, { type: "blue" }, fight.level),
+            fight.weight && React.createElement(Badge, null, fight.weight)
+          ),
+          React.createElement("div", { style: { display: "flex", gap: 6 } },
+            optBtn("confirm", "Sim, sou eu", "#4caf7d"),
+            optBtn("dispute", "Resultado errado", "#d4844c"),
+            optBtn("notme", "Não sou eu", "#e05555")
           )
         );
       }),
       React.createElement("div", { style: { display: "flex", gap: 10, marginTop: 20 } },
         React.createElement("button", {
-          onClick: handleConfirm,
-          disabled: saving || Object.values(confirmed).every(v => !v),
-          style: { ...s.btnGold, flex: 1, marginTop: 0, opacity: (saving || Object.values(confirmed).every(v => !v)) ? 0.5 : 1 }
-        }, saving ? "A guardar..." : `Confirmar ${Object.values(confirmed).filter(Boolean).length} combate${Object.values(confirmed).filter(Boolean).length !== 1 ? "s" : ""}`),
-        React.createElement("button", { onClick: onDone, style: { ...s.btnGold, marginTop: 0, background: T.BG4, color: T.TEXT2, border: `1px solid ${T.BORDER}` } }, "Ignorar")
+          onClick: handleSubmit,
+          disabled: saving || Object.keys(choices).filter(k => choices[k]).length === 0,
+          style: { ...s.btnGold, flex: 1, marginTop: 0, opacity: (saving || Object.keys(choices).filter(k => choices[k]).length === 0) ? 0.5 : 1 }
+        }, saving ? "A guardar..." : "Submeter respostas"),
+        React.createElement("button", { onClick: onDone, style: { ...s.btnGold, marginTop: 0, background: T.BG4, color: T.TEXT2, border: `1px solid ${T.BORDER}` } }, "Mais tarde")
       )
+    )
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// RESOLVER RESULTADOS — contestações (só superadmin)
+// ═══════════════════════════════════════════════════════════
+function ResolvePage({ onLogout, user, setPage, pendingCount, resolveCount, club, clubs, viewAsClub, setViewAsClub }) {
+  const s = getStyles();
+  const [disputes, setDisputes] = React.useState([]);
+  const [fighters, setFighters] = React.useState([]);
+  const [fights, setFights] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [busy, setBusy] = React.useState(null);
+
+  async function load() {
+    setLoading(true);
+    const [fc, ff, fi] = await Promise.all([
+      db.get("fight_confirmations", { status: "disputed" }),
+      db.get("fighters"),
+      db.get("fights")
+    ]);
+    setDisputes(fc || []);
+    setFighters(ff || []);
+    setFights(fi || []);
+    setLoading(false);
+  }
+  React.useEffect(() => { load(); }, []);
+
+  const fighterName = (id) => {
+    const f = fighters.find(x => String(x.id) === String(id));
+    return f ? f.name : "—";
+  };
+  const getFight = (id) => fights.find(x => String(x.id) === String(id));
+
+  // Dar razão ao contestante: adiciona o combate ao histórico dele com resultado invertido
+  async function resolveInFavor(dispute) {
+    setBusy(dispute.id);
+    const fight = getFight(dispute.fight_id);
+    if (fight) {
+      const owner = fighters.find(x => String(x.id) === String(dispute.owner_fighter_id));
+      const challenger = fighters.find(x => String(x.id) === String(dispute.new_fighter_id));
+      const mirror = fight.result === "V" ? "D" : fight.result === "D" ? "V" : "E";
+      const newId = `f${Date.now()}_${fight.id}`;
+      await db.insert("fights", {
+        id: newId, fighter_id: dispute.new_fighter_id,
+        opponent: owner ? owner.name : "", opponent_team: owner ? (owner.team || "") : "",
+        result: mirror, method: fight.method, event: fight.event, date: fight.date,
+        modality: fight.modality, sub_modality: fight.sub_modality, level: fight.level,
+        weight: fight.weight, federation: fight.federation || "", confirmed_from: fight.id
+      });
+    }
+    await db.update("fight_confirmations", dispute.id, { status: "resolved_challenger", resolved_at: new Date().toISOString() });
+    await load(); setBusy(null);
+  }
+
+  // Dar razão ao dono do registo: mantém o combate como está, fecha a contestação
+  async function resolveKeepOriginal(dispute) {
+    setBusy(dispute.id);
+    await db.update("fight_confirmations", dispute.id, { status: "resolved_owner", resolved_at: new Date().toISOString() });
+    await load(); setBusy(null);
+  }
+
+  // Descartar (não era o atleta / engano)
+  async function dismiss(dispute) {
+    setBusy(dispute.id);
+    await db.update("fight_confirmations", dispute.id, { status: "dismissed", resolved_at: new Date().toISOString() });
+    await load(); setBusy(null);
+  }
+
+  return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
+    React.createElement("div", { style: { maxWidth: 680, margin: "0 auto" } },
+      React.createElement(Header, { onLogout, user, currentPage: "resolve", setPage, pendingCount, resolveCount, club: null, viewAsClub, setViewAsClub }),
+      React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: "#d4844c", marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 } }, "Resolver Resultados"),
+      React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginBottom: 16 } }, "Combates contestados por atletas que dizem ter um resultado diferente do registado."),
+
+      loading
+        ? React.createElement(Card, null, React.createElement("div", { style: { textAlign: "center", color: T.TEXT3, padding: "24px 0" } }, "A carregar..."))
+        : disputes.length === 0
+          ? React.createElement(Card, { gold: true }, React.createElement("div", { style: { textAlign: "center", padding: "24px 0" } },
+              React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "#4caf7d", marginBottom: 6 } }, "Tudo resolvido"),
+              React.createElement("div", { style: { fontSize: 13, color: T.TEXT2 } }, "Não há contestações pendentes.")
+            ))
+          : disputes.map(d => {
+              const fight = getFight(d.fight_id);
+              const challenger = fighterName(d.new_fighter_id);
+              const owner = fighterName(d.owner_fighter_id);
+              const ownerResult = fight ? (fight.result === "V" ? "Vitória" : fight.result === "D" ? "Derrota" : "Empate") : "—";
+              return React.createElement(Card, { key: d.id, style: { marginBottom: 12, borderColor: "#d4844c44" } },
+                React.createElement("div", { style: { fontSize: 11, color: "#d4844c", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 } }, "Contestação"),
+                React.createElement("div", { style: { fontSize: 13, color: T.TEXT, marginBottom: 4 } },
+                  React.createElement("b", null, challenger), " diz que o combate registado por ", React.createElement("b", null, owner), " tem o resultado errado."
+                ),
+                fight && React.createElement("div", { style: { background: T.BG3, borderRadius: 8, padding: "10px 12px", margin: "10px 0", fontSize: 12, color: T.TEXT2 } },
+                  React.createElement("div", { style: { marginBottom: 3 } }, React.createElement("b", { style: { color: T.TEXT } }, fight.event || "Combate"), " · ", fight.date || "—"),
+                  React.createElement("div", null, `Registado por ${owner} como: `, React.createElement("b", { style: { color: fight.result === "V" ? "#4caf7d" : fight.result === "D" ? "#e05555" : T.TEXT3 } }, ownerResult)),
+                  React.createElement("div", { style: { marginTop: 4, display: "flex", gap: 5, flexWrap: "wrap" } },
+                    fight.modality && React.createElement(Badge, null, fight.modality),
+                    fight.sub_modality && React.createElement(Badge, { type: "gold" }, fight.sub_modality),
+                    fight.weight && React.createElement(Badge, null, fight.weight)
+                  )
+                ),
+                React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8, marginTop: 12 } },
+                  React.createElement("button", { onClick: () => resolveInFavor(d), disabled: busy === d.id, style: { ...s.btnGreen, opacity: busy === d.id ? 0.5 : 1 } }, `Dar razão a ${challenger} (adiciona ao histórico dele com resultado invertido)`),
+                  React.createElement("button", { onClick: () => resolveKeepOriginal(d), disabled: busy === d.id, style: { ...s.btnOutline, opacity: busy === d.id ? 0.5 : 1 } }, `Manter registo de ${owner} (fecha sem alterar)`),
+                  React.createElement("button", { onClick: () => dismiss(d), disabled: busy === d.id, style: { ...s.btnRed, opacity: busy === d.id ? 0.5 : 1 } }, "Descartar contestação")
+                )
+              );
+            }),
+      React.createElement(Footer)
     )
   );
 }
@@ -2985,7 +3136,7 @@ function MatchmakingPage({ onLogout, user, setPage, pendingCount, club, clubs, v
 
   return React.createElement("div", { style: { minHeight: "100vh", background: T.BG, padding: "20px 16px" } },
     React.createElement("div", { style: { maxWidth: 720, margin: "0 auto" } },
-      React.createElement(Header, { onLogout, user, currentPage: "matchmaking", setPage, pendingCount, club, viewAsClub, setViewAsClub }),
+      React.createElement(Header, { onLogout, user, currentPage: "matchmaking", setPage, pendingCount, resolveCount, club, viewAsClub, setViewAsClub }),
       React.createElement("div", { style: { fontSize: 13, fontWeight: 700, color: T.TEXT, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 } }, "Matchmaking"),
       React.createElement("div", { style: { fontSize: 12, color: T.TEXT2, marginBottom: 16 } }, "Encontra combates equilibrados com base no histórico dos atletas."),
       React.createElement(Card, { gold: true, style: { marginBottom: 16 } },
@@ -3080,6 +3231,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState("fighters");
   const [pendingCount, setPendingCount] = useState(0);
+  const [resolveCount, setResolveCount] = useState(0);
   const [viewAsClub, setViewAsClub] = useState(null);
 
   const isRegister = window.location.search.includes("register=true");
@@ -3128,6 +3280,12 @@ function App() {
           ? pending.length
           : pending.filter(x => x.club_id === user.club_id).length);
       setUsers(u);
+      if (user.role === "superadmin") {
+        try {
+          const disp = await db.get("fight_confirmations", { status: "disputed" });
+          setResolveCount(Array.isArray(disp) ? disp.length : 0);
+        } catch(e) { setResolveCount(0); }
+      }
     }
     load();
   }, [user]);
@@ -3167,7 +3325,7 @@ function App() {
   if (user.role === "admin" || user.role === "superadmin") return React.createElement(AdminDashboard, {
     fighters: effectiveFighters, setFighters, users, setUsers,
     onLogout: handleLogout,
-    user, page, setPage, pendingCount,
+    user, page, setPage, pendingCount, resolveCount,
     club: effectiveClub, clubs, setClubes: setClubs,
     allFighters, allFights,
     viewAsClub, setViewAsClub
